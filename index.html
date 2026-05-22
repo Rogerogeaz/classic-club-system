@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Classic Club System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:url('https://i.ibb.co/NgmLnt70/images-13.jpg') center/cover no-repeat fixed;
+  min-height:100vh;
+  color:white;
+}
+
+.overlay{
+  background:rgba(0,0,0,0.75);
+  min-height:100vh;
+  padding:20px;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.glass{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.center{
+  text-align:center;
+}
+
+.logo{
+  width:160px;
+  display:block;
+  margin:auto;
+  cursor:pointer;
+}
+
+h1{
+  color:gold;
+  margin-top:15px;
+}
+
+.btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:gold;
+  color:black;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+.danger{
+  background:crimson !important;
+  color:white !important;
+}
+
+.success{
+  background:green !important;
+  color:white !important;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin-top:8px;
+  margin-bottom:15px;
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+table th,
+table td{
+  border:1px solid rgba(255,255,255,0.1);
+  padding:10px;
+  text-align:center;
+}
+
+table input{
+  width:60px;
+  height:40px;
+  text-align:center;
+}
+.table-wrapper{
+  width:100%;
+  overflow-x:auto;
+}
+
+.stock-table{
+  min-width:600px;
+}
+
+.stock-table th,
+.stock-table td{
+  white-space:nowrap;
+}
+
+.stock-table input{
+  width:70px;
+}
+.section-title{
+  color:gold;
+  margin-bottom:15px;
+}
+
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.modal-content{
+  width:90%;
+  max-width:400px;
+  background:#111;
+  padding:30px;
+  border-radius:20px;
+}
+
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+}
+
+.stat-card{
+  background:rgba(255,255,255,0.08);
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
+}
+
+.stat-card h2{
+  color:gold;
+  margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="overlay">
+
+<!-- PUBLIC SCREEN -->
+<div id="publicScreen" class="glass center">
+
+<img src="https://i.ibb.co/r2sKLcTv/file-000000008b30722fa05ae4d0f4208539.png" class="logo" id="logoTap">
+
+<h1>CLASSIC CLUB</h1>
+
+<p>Good Beer • Great Times</p>
+
+<div id="date"></div>
+<div id="time"></div>
+
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal hidden" id="loginModal">
+
+<div class="modal-content">
+
+<h2 class="center" style="color:gold;margin-bottom:20px;">
+LOGIN
+</h2>
+
+<input type="password" id="pinInput" placeholder="Enter PIN">
+
+<button class="btn" onclick="loginUser()">
+LOGIN
+</button>
+
+<button class="btn danger" onclick="closeLogin()">
+CLOSE
+</button>
+
+</div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden">
+
+<div class="glass">
+
+<button class="btn danger" onclick="logoutUser()">
+Logout
+</button>
+
+<h2 class="section-title">
+ADMIN DASHBOARD
+</h2>
+
+<div class="card-grid">
+
+<div class="stat-card">
+<h2>Expected Cash</h2>
+<p id="expectedCash">Ksh 0</p>
+</div>
+
+<div class="stat-card">
+<h2>Submitted Cash</h2>
+<p id="submittedCash">Ksh 0</p>
+</div>
+
+<div class="stat-card">
+<h2>Profit</h2>
+<p id="profit">Ksh 0</p>
+</div>
+
+<div class="stat-card">
+<h2>Difference</h2>
+<p id="difference">Ksh 0</p>
+</div>
+
+</div>
+
+</div>
+<div class="glass">
+
+<h2 class="section-title">
+REPORTS
+</h2>
+
+<button class="btn"
+onclick="viewReports()">
+
+View Reports
+
+</button>
+
+<div id="reportsContainer"></div>
+
+</div>
+<div class="glass">
+
+<h2 class="section-title">
+CREATE EMPLOYEE
+</h2>
+
+<input type="text" id="employeeName" placeholder="Employee Name">
+
+<input type="password" id="employeePin" placeholder="Employee PIN">
+
+<button class="btn success" onclick="createEmployee()">
+Create Employee
+</button>
+
+<button class="btn"
+onclick="viewEmployees()">
+
+View Employees
+
+</button>
+
+<div id="employeeList"></div>
+
+</div>
+<div class="glass">
+
+<h2 class="section-title">
+KEG SETTINGS
+</h2>
+
+<input
+type="number"
+id="kegSize"
+placeholder="Full Keg KG (Example 62)"
+>
+
+<input
+type="number"
+id="kegBuyingCost"
+placeholder="Keg Buying Cost"
+>
+
+<input
+type="number"
+id="kegExpectedRevenue"
+placeholder="Expected Revenue After Selling Full Keg"
+>
+
+<button
+class="btn success"
+onclick="saveKegSettings()">
+
+Save Keg Settings
+
+</button>
+
+</div>
+<div class="glass">
+
+<h2 class="section-title">
+PRODUCT MANAGEMENT
+</h2>
+
+<input type="text" id="productName" placeholder="Product Name">
+
+<input type="number" id="buyingPrice" placeholder="Buying Price">
+
+<input type="number" id="sellingPrice" placeholder="Selling Price">
+
+<button class="btn success" onclick="saveProduct()">
+Save Product
+</button>
+
+<div id="productList"></div>
+
+<button class="btn danger"
+onclick="resetSystem()">
+
+RESET SYSTEM
+
+</button>
+
+</div>
+
+</div>
+
+<!-- EMPLOYEE PANEL -->
+<div id="employeePanel" class="hidden">
+
+<div class="glass">
+
+<button class="btn danger" onclick="logoutUser()">
+Logout
+</button>
+
+<h2 class="section-title">
+SHIFT OPENING
+</h2>
+
+<div class="table-wrapper">
+
+<table class="stock-table">
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Full</th>
+<th>3/4</th>
+<th>Half</th>
+<th>Quarter</th>
+</tr>
+</thead>
+
+<tbody id="openingStockTable"></tbody>
+
+</table>
+
+</div>
+
+<button class="btn success" onclick="startShift()">
+Start Shift
+</button>
+
+</div>
+
+<div class="glass">
+
+<h2 class="section-title">
+SHIFT CLOSING
+</h2>
+
+<div class="table-wrapper">
+
+<table class="stock-table">
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Full</th>
+<th>3/4</th>
+<th>Half</th>
+<th>Quarter</th>
+</tr>
+</thead>
+
+<tbody id="closingStockTable"></tbody>
+
+</table>
+
+</div>
+
+<h2 class="section-title">
+KEG STOCK
+</h2>
+
+<input
+type="number"
+id="openingKeg"
+placeholder="Opening KGs">
+
+<input
+type="number"
+id="closingKeg"
+placeholder="Closing KGs">
+
+<input type="number"
+id="cashSubmitted"
+placeholder="Cash Submitted">
+
+<h2 class="section-title">
+Expenses
+</h2>
+
+<div id="expenseContainer"></div>
+
+<button class="btn"
+onclick="addExpenseField()">
+
+Add Expense
+
+</button>
+
+<button class="btn success" onclick="closeShift()">
+Close Shift
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+updateDoc,
+setDoc,
+getDoc,
+serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyAL0r69PXV6VVyx4LJRK_vDXyMVd-aCx6U",
+
+authDomain: "classic-club-system.firebaseapp.com",
+
+projectId: "classic-club-system",
+
+storageBucket: "classic-club-system.firebasestorage.app",
+
+messagingSenderId: "663047969033",
+
+appId: "1:663047969033:web:fb377130cda38c1ea5dbd8"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+let employees = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+
+await loadEmployees();
+
+await loadProducts();
+
+await loadDashboard();
+
+updateTime();
+
+setInterval(updateTime,1000);
+
+});
+
+function updateTime(){
+
+const now = new Date();
+
+document.getElementById('date').innerHTML =
+now.toDateString();
+
+document.getElementById('time').innerHTML =
+now.toLocaleTimeString();
+
+}
+
+let tapCount = 0;
+
+document.getElementById('logoTap')
+.addEventListener('click',()=>{
+
+tapCount++;
+
+if(tapCount===3){
+
+document.getElementById('loginModal')
+.classList.remove('hidden');
+
+tapCount=0;
+
+}
+
+setTimeout(()=>{
+tapCount=0;
+},1000);
+
+});
+
+function closeLogin(){
+
+document.getElementById('loginModal')
+.classList.add('hidden');
+
+}
+
+async function loadEmployees(){
+
+employees = [];
+
+const querySnapshot =
+await getDocs(collection(db,'employees'));
+
+querySnapshot.forEach((employeeDoc)=>{
+
+employees.push({
+
+id:employeeDoc.id,
+
+...employeeDoc.data()
+
+});
+
+});
+
+}
+
+async function loginUser(){
+
+const pin =
+document.getElementById('pinInput').value.trim();
+
+await loadEmployees();
+
+if(pin==='3030'){
+
+document.getElementById('publicScreen')
+.classList.add('hidden');
+
+document.getElementById('loginModal')
+.classList.add('hidden');
+
+document.getElementById('adminPanel')
+.classList.remove('hidden');
+
+return;
+
+}
+
+const foundEmployee =
+employees.find(emp => emp.pin === pin);
+
+if(foundEmployee){
+
+document.getElementById('publicScreen')
+.classList.add('hidden');
+
+document.getElementById('loginModal')
+.classList.add('hidden');
+
+document.getElementById('employeePanel')
+.classList.remove('hidden');
+
+await loadShiftProducts();
+
+return;
+
+}
+
+alert('Invalid PIN');
+
+}
+
+function logoutUser(){
+
+document.getElementById('publicScreen')
+.classList.remove('hidden');
+
+document.getElementById('adminPanel')
+.classList.add('hidden');
+
+document.getElementById('employeePanel')
+.classList.add('hidden');
+
+}
+
+async function createEmployee(){
+
+const employeeName =
+document.getElementById('employeeName').value.trim();
+
+const employeePin =
+document.getElementById('employeePin').value.trim();
+
+if(
+employeeName === '' ||
+employeePin === ''
+){
+
+alert('Fill all fields');
+
+return;
+
+}
+
+try{
+
+await addDoc(collection(db,'employees'),{
+
+name:employeeName,
+
+pin:employeePin,
+
+createdAt:serverTimestamp()
+
+});
+
+alert('Employee Created');
+
+document.getElementById('employeeName').value = '';
+
+document.getElementById('employeePin').value = '';
+
+viewEmployees();
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error creating employee');
+
+}
+
+}
+async function viewEmployees(){
+
+const container =
+document.getElementById('employeeList');
+
+container.innerHTML = '';
+
+try{
+
+const querySnapshot =
+await getDocs(collection(db,'employees'));
+
+querySnapshot.forEach((employeeDoc)=>{
+
+const employee = employeeDoc.data();
+
+container.innerHTML += `
+
+<div class="glass">
+
+<h3>${employee.name}</h3>
+
+<p>PIN: ${employee.pin}</p>
+
+<button class="btn danger"
+onclick="deleteEmployee('${employeeDoc.id}')">
+
+Delete Employee
+
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error loading employees');
+
+}
+
+}
+
+async function deleteEmployee(id){
+
+const answer = confirm(
+'Delete this employee?'
+);
+
+if(!answer) return;
+
+try{
+
+await deleteDoc(
+doc(db,'employees',id)
+);
+
+alert('Employee Deleted');
+
+viewEmployees();
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error deleting employee');
+
+}
+
+}
+async function saveKegSettings(){
+
+const kegSize =
+Number(document.getElementById('kegSize').value);
+
+const kegBuyingPrice =
+Number(document.getElementById('kegBuyingCost').value);
+
+const kegRevenue =
+Number(document.getElementById('kegExpectedRevenue').value);
+
+if(
+!kegSize ||
+!kegBuyingPrice ||
+!kegRevenue
+){
+
+alert('Fill all keg settings');
+
+return;
+
+}
+
+try{
+
+await setDoc(doc(db,'settings','kegSettings'),{
+
+kegSize: kegSize,
+
+kegBuyingPrice: kegBuyingPrice,
+
+kegRevenue: kegRevenue
+
+});
+
+alert('Keg Settings Saved');
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error saving keg settings');
+
+}
+
+}
+async function saveProduct(){
+
+const productName =
+document.getElementById('productName').value;
+
+const buyingPrice =
+Number(document.getElementById('buyingPrice').value);
+
+const sellingPrice =
+Number(document.getElementById('sellingPrice').value);
+
+await addDoc(collection(db,'products'),{
+
+name:productName,
+
+buyingPrice,
+
+sellingPrice,
+
+createdAt:serverTimestamp()
+
+});
+
+alert('Product Saved');
+
+loadProducts();
+
+}
+
+async function loadProducts(){
+
+const container =
+document.getElementById('productList');
+
+container.innerHTML='';
+
+const querySnapshot =
+await getDocs(collection(db,'products'));
+
+querySnapshot.forEach((productDoc)=>{
+
+const product = productDoc.data();
+
+container.innerHTML += `
+
+<div class="glass">
+
+<h3>${product.name}</h3>
+
+<p>Buying: Ksh ${product.buyingPrice}</p>
+
+<p>Selling: Ksh ${product.sellingPrice}</p>
+
+<button class="btn"
+onclick="editProduct(
+'${productDoc.id}',
+'${product.name}',
+'${product.buyingPrice}',
+'${product.sellingPrice}'
+)">
+
+Edit Product
+
+</button>
+
+<button class="btn danger"
+onclick="deleteProduct('${productDoc.id}')">
+
+Delete Product
+
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+async function deleteProduct(id){
+
+const answer = confirm(
+'Delete this product?'
+);
+
+if(!answer) return;
+
+try{
+
+await deleteDoc(
+doc(db,'products',id)
+);
+
+alert('Product Deleted');
+
+loadProducts();
+
+loadShiftProducts();
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error deleting product');
+
+}
+
+}
+
+async function editProduct(
+id,
+oldName,
+oldBuying,
+oldSelling
+){
+
+const newName =
+prompt('Edit Product Name', oldName);
+
+if(!newName) return;
+
+const newBuying =
+prompt('Edit Buying Price', oldBuying);
+
+if(!newBuying) return;
+
+const newSelling =
+prompt('Edit Selling Price', oldSelling);
+
+if(!newSelling) return;
+
+try{
+
+await updateDoc(
+doc(db,'products',id),
+{
+
+name:newName,
+
+buyingPrice:Number(newBuying),
+
+sellingPrice:Number(newSelling)
+
+}
+);
+
+alert('Product Updated');
+
+loadProducts();
+
+loadShiftProducts();
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error updating product');
+
+}
+
+}
+async function resetSystem(){
+
+const answer = confirm(
+'Delete ALL system data?'
+);
+
+if(!answer) return;
+
+const adminPin = prompt(
+'Enter Admin PIN'
+);
+
+if(adminPin !== '3030'){
+
+alert('Wrong PIN');
+
+return;
+
+}
+
+try{
+
+// DELETE EMPLOYEES
+const employeeSnapshot =
+await getDocs(collection(db,'employees'));
+
+for(const employeeDoc of employeeSnapshot.docs){
+
+await deleteDoc(
+doc(db,'employees',employeeDoc.id)
+);
+
+}
+
+// DELETE PRODUCTS
+const productSnapshot =
+await getDocs(collection(db,'products'));
+
+for(const productDoc of productSnapshot.docs){
+
+await deleteDoc(
+doc(db,'products',productDoc.id)
+);
+
+}
+
+// DELETE SHIFT OPENING
+const openingSnapshot =
+await getDocs(collection(db,'shiftOpening'));
+
+for(const openingDoc of openingSnapshot.docs){
+
+await deleteDoc(
+doc(db,'shiftOpening',openingDoc.id)
+);
+
+}
+
+// DELETE SHIFT CLOSING
+const closingSnapshot =
+await getDocs(collection(db,'shiftClosing'));
+
+for(const closingDoc of closingSnapshot.docs){
+
+await deleteDoc(
+doc(db,'shiftClosing',closingDoc.id)
+);
+
+}
+
+// CLEAR LOCAL STORAGE
+localStorage.removeItem('openingStock');
+
+// CLEAR UI
+document.getElementById('productList').innerHTML = '';
+
+document.getElementById('employeeList').innerHTML = '';
+
+document.getElementById('reportsContainer').innerHTML = '';
+
+document.getElementById('expectedCash')
+.innerHTML = 'Ksh 0';
+
+document.getElementById('submittedCash')
+.innerHTML = 'Ksh 0';
+
+document.getElementById('profit')
+.innerHTML = 'Ksh 0';
+
+document.getElementById('difference')
+.innerHTML = 'Ksh 0';
+
+alert('System Reset Successful');
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error resetting system');
+
+}
+
+}
+async function loadShiftProducts(){
+
+const openingTable =
+document.getElementById('openingStockTable');
+
+const closingTable =
+document.getElementById('closingStockTable');
+
+if(!openingTable || !closingTable){
+return;
+}
+
+openingTable.innerHTML = '';
+closingTable.innerHTML = '';
+
+try{
+
+const querySnapshot =
+await getDocs(collection(db,'products'));
+
+querySnapshot.forEach((productDoc)=>{
+
+const product = productDoc.data();
+
+openingTable.innerHTML += `
+
+<tr>
+
+<td>${product.name}</td>
+
+<td>
+<input
+type="number"
+id="open-full-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="open-three-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="open-half-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="open-quarter-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+</tr>
+
+`;
+
+closingTable.innerHTML += `
+
+<tr>
+
+<td>${product.name}</td>
+
+<td>
+<input
+type="number"
+id="close-full-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="close-three-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="close-half-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+<td>
+<input
+type="number"
+id="close-quarter-${productDoc.id}"
+value="0"
+min="0">
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error loading products');
+
+}
+
+}
+function addExpenseField(){
+
+const container =
+document.getElementById('expenseContainer');
+
+const div = document.createElement('div');
+
+div.className = 'glass';
+
+div.innerHTML = `
+
+<input
+type="text"
+placeholder="Expense Name"
+class="expense-name">
+
+<input
+type="number"
+placeholder="Amount"
+class="expense-amount">
+
+`;
+
+container.appendChild(div);
+
+}
+async function startShift(){
+
+try{
+
+const shiftData = [];
+
+const querySnapshot =
+await getDocs(collection(db,'products'));
+
+querySnapshot.forEach((productDoc)=>{
+
+const product = productDoc.data();
+
+const full =
+Number(document.getElementById(`open-full-${productDoc.id}`).value || 0);
+
+const three =
+Number(document.getElementById(`open-three-${productDoc.id}`).value || 0);
+
+const half =
+Number(document.getElementById(`open-half-${productDoc.id}`).value || 0);
+
+const quarter =
+Number(document.getElementById(`open-quarter-${productDoc.id}`).value || 0);
+
+shiftData.push({
+
+productId: productDoc.id,
+
+productName: product.name,
+
+full: full,
+
+threeQuarter: three,
+
+half: half,
+
+quarter: quarter
+
+});
+
+});
+
+await addDoc(collection(db,'shiftOpening'),{
+
+createdAt: serverTimestamp(),
+
+stock: shiftData
+
+});
+
+localStorage.setItem(
+'openingStock',
+JSON.stringify(shiftData)
+);
+
+alert('Shift Started Successfully');
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error starting shift');
+
+}
+
+}
+
+async function closeShift(){
+
+try{
+
+const closingStock = [];
+
+let expectedCash = 0;
+
+let totalProfit = 0;
+
+let totalExpenses = 0;
+
+let kegProfit = 0;
+
+const querySnapshot =
+await getDocs(collection(db,'products'));
+
+const savedOpening =
+JSON.parse(localStorage.getItem('openingStock')) || [];
+
+querySnapshot.forEach((productDoc)=>{
+
+const product = productDoc.data();
+
+const full =
+Number(document.getElementById(`close-full-${productDoc.id}`).value || 0);
+
+const three =
+Number(document.getElementById(`close-three-${productDoc.id}`).value || 0);
+
+const half =
+Number(document.getElementById(`close-half-${productDoc.id}`).value || 0);
+
+const quarter =
+Number(document.getElementById(`close-quarter-${productDoc.id}`).value || 0);
+
+const openingProduct =
+savedOpening.find(
+item => item.productId === productDoc.id
+);
+
+const openFull =
+openingProduct?.full || 0;
+
+const openThree =
+openingProduct?.threeQuarter || 0;
+
+const openHalf =
+openingProduct?.half || 0;
+
+const openQuarter =
+openingProduct?.quarter || 0;
+
+const openingUnits =
+(openFull * 4) +
+(openThree * 3) +
+(openHalf * 2) +
+(openQuarter * 1);
+
+const closingUnits =
+(full * 4) +
+(three * 3) +
+(half * 2) +
+(quarter * 1);
+
+let soldUnits =
+openingUnits - closingUnits;
+
+if(soldUnits < 0){
+soldUnits = 0;
+}
+
+const sales =
+soldUnits * (product.sellingPrice / 4);
+
+const profit =
+soldUnits *
+((product.sellingPrice - product.buyingPrice) / 4);
+
+expectedCash += sales;
+
+totalProfit += profit;
+
+closingStock.push({
+
+productId: productDoc.id,
+
+productName: product.name,
+
+full: full,
+
+threeQuarter: three,
+
+half: half,
+
+quarter: quarter,
+
+soldUnits: soldUnits,
+
+sales: sales,
+
+profit: profit
+
+});
+
+});
+
+document.querySelectorAll('.expense-amount')
+.forEach((expense)=>{
+
+totalExpenses +=
+Number(expense.value || 0);
+
+});
+
+const openingKeg =
+Number(document.getElementById('openingKeg').value || 0);
+
+const closingKeg =
+Number(document.getElementById('closingKeg').value || 0);
+
+let soldKeg = openingKeg - closingKeg;
+
+if(soldKeg < 0){
+soldKeg = 0;
+}
+
+// LOAD KEG SETTINGS
+const kegSettingsDoc =
+await getDoc(doc(db,'settings','kegSettings'));
+
+let kegSellingPrice = 0;
+let kegBuyingPrice = 0;
+let kegSize = 1;
+
+if(kegSettingsDoc.exists()){
+
+const kegSettings =
+kegSettingsDoc.data();
+
+kegSize =
+Number(kegSettings.kegSize || 1);
+
+kegBuyingPrice =
+Number(kegSettings.kegBuyingPrice || 0);
+
+const kegRevenue =
+Number(kegSettings.kegRevenue || 0);
+
+// PRICE PER KG
+kegSellingPrice =
+kegRevenue / kegSize;
+
+}
+
+// KEG CASH
+const kegSales =
+soldKeg * kegSellingPrice;
+
+kegProfit =
+soldKeg * (
+kegSellingPrice -
+(kegBuyingPrice / kegSize)
+);
+
+// ADD TO TOTALS
+expectedCash += kegSales;
+
+totalProfit += kegProfit;
+
+const submittedCash =
+Number(document.getElementById('cashSubmitted').value || 0);
+
+const difference =
+submittedCash - expectedCash;
+
+await addDoc(collection(db,'shiftClosing'),{
+
+createdAt: serverTimestamp(),
+
+stock: closingStock,
+
+expectedCash: expectedCash,
+
+submittedCash: submittedCash,
+
+profit: totalProfit - totalExpenses,
+
+expenses: totalExpenses,
+
+difference: difference,
+
+openingKeg: openingKeg,
+
+closingKeg: closingKeg,
+
+soldKeg: soldKeg,
+
+kegSales: kegSales
+
+});
+
+document.getElementById('expectedCash')
+.innerHTML = `Ksh ${expectedCash.toFixed(0)}`;
+
+document.getElementById('submittedCash')
+.innerHTML = `Ksh ${submittedCash.toFixed(0)}`;
+
+document.getElementById('profit')
+.innerHTML =
+`Ksh ${(totalProfit - totalExpenses).toFixed(0)}`;
+
+document.getElementById('difference')
+.innerHTML = `Ksh ${difference.toFixed(0)}`;
+
+localStorage.removeItem('openingStock');
+
+alert('Shift Closed Successfully');
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error closing shift');
+
+}
+
+}
+
+async function loadDashboard(){
+
+const querySnapshot =
+await getDocs(collection(db,'shiftClosing'));
+
+let totalSales = 0;
+let totalSubmitted = 0;
+let totalProfit = 0;
+let totalDifference = 0;
+
+querySnapshot.forEach((reportDoc)=>{
+
+const report = reportDoc.data();
+
+totalSales += report.expectedCash || 0;
+
+totalSubmitted += report.submittedCash || 0;
+
+totalProfit += report.profit || 0;
+
+totalDifference += report.difference || 0;
+
+});
+
+document.getElementById('expectedCash')
+.innerHTML = `Ksh ${totalSales.toFixed(0)}`;
+
+document.getElementById('submittedCash')
+.innerHTML = `Ksh ${totalSubmitted.toFixed(0)}`;
+
+document.getElementById('profit')
+.innerHTML = `Ksh ${totalProfit.toFixed(0)}`;
+
+document.getElementById('difference')
+.innerHTML = `Ksh ${totalDifference.toFixed(0)}`;
+
+}
+
+window.loginUser = loginUser;
+window.closeLogin = closeLogin;
+window.logoutUser = logoutUser;
+window.createEmployee = createEmployee;
+window.saveProduct = saveProduct;
+window.loadProducts = loadProducts;
+window.loadShiftProducts = loadShiftProducts;
+async function viewReports(){
+
+const reportsContainer =
+document.getElementById('reportsContainer');
+
+reportsContainer.innerHTML = '';
+
+try{
+
+const querySnapshot =
+await getDocs(collection(db,'shiftClosing'));
+
+querySnapshot.forEach((reportDoc)=>{
+
+const report = reportDoc.data();
+
+let reportDate = 'Unknown Date';
+
+if(report.createdAt?.seconds){
+
+reportDate = new Date(
+report.createdAt.seconds * 1000
+).toLocaleString();
+
+}
+
+reportsContainer.innerHTML += `
+
+<div class="glass">
+
+<h3>${reportDate}</h3>
+
+<p>
+Expected Cash:
+Ksh ${(report.expectedCash || 0).toFixed(0)}
+</p>
+
+<p>
+Submitted Cash:
+Ksh ${(report.submittedCash || 0).toFixed(0)}
+</p>
+
+<p>
+Profit:
+Ksh ${(report.profit || 0).toFixed(0)}
+</p>
+
+<p>
+Expenses:
+Ksh ${(report.expenses || 0).toFixed(0)}
+</p>
+
+<p>
+Difference:
+Ksh ${(report.difference || 0).toFixed(0)}
+</p>
+
+<p>
+Keg Sold:
+${(report.soldKeg || 0).toFixed(1)} KGs
+</p>
+
+<p>
+Keg Sales:
+Ksh ${(report.kegSales || 0).toFixed(0)}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error loading reports');
+
+}
+
+}
+window.startShift = startShift;
+window.closeShift = closeShift;
+window.viewReports = viewReports;
+window.saveKegSettings = saveKegSettings;
+window.addExpenseField = addExpenseField;
+window.resetSystem = resetSystem;
+window.viewEmployees = viewEmployees;
+window.deleteEmployee = deleteEmployee;
+window.deleteProduct = deleteProduct;
+window.editProduct = editProduct;
+</script>
+
+</body>
+</html>
