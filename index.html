@@ -613,25 +613,33 @@ now.toLocaleTimeString();
 
 let tapCount = 0;
 
-document.getElementById('logoTap')
-.addEventListener('click',()=>{
+const logo =
+document.getElementById('logoTap');
+
+function handleLogoTap(){
 
 tapCount++;
 
-if(tapCount===3){
+if(tapCount === 3){
 
 document.getElementById('loginModal')
 .classList.remove('hidden');
 
-tapCount=0;
+tapCount = 0;
 
 }
 
 setTimeout(()=>{
-tapCount=0;
+tapCount = 0;
 },1000);
 
-});
+}
+
+/* DESKTOP CLICK */
+logo.addEventListener('click', handleLogoTap);
+
+/* MOBILE TOUCH */
+logo.addEventListener('touchstart', handleLogoTap);
 
 function closeLogin(){
 
