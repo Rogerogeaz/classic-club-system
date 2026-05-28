@@ -254,7 +254,23 @@ ADMIN DASHBOARD
 
 </div>
 <div class="glass">
+<div class="glass">
 
+<h2 class="section-title">
+LIVE INVENTORY
+</h2>
+
+<button
+class="btn"
+onclick="viewInventory()">
+
+View Inventory
+
+</button>
+
+<div id="inventoryContainer"></div>
+
+</div>
 <h2 class="section-title">
 REPORTS
 </h2>
@@ -334,6 +350,18 @@ PRODUCT MANAGEMENT
 
 <input type="text" id="productName" placeholder="Product Name">
 
+<select id="portionType">
+
+<option value="full">
+Normal Bottle
+</option>
+
+<option value="portion">
+250ml Spirit (Portioned)
+</option>
+
+</select>
+
 <input type="number" id="buyingPrice" placeholder="Buying Price">
 
 <input type="number" id="sellingPrice" placeholder="Selling Price">
@@ -363,10 +391,65 @@ RESET SYSTEM
 <button class="btn danger" onclick="logoutUser()">
 Logout
 </button>
+<div class="glass">
 
+<h2 class="section-title">
+STOCK RECEIVING
+</h2>
+
+<select id="receiveProduct"></select>
+
+<input
+type="number"
+id="receiveQuantity"
+placeholder="Quantity Received">
+
+<input
+type="number"
+id="receiveBuying"
+placeholder="Buying Price Per Item">
+
+<button
+class="btn success"
+onclick="receiveStock()">
+
+Receive Stock
+
+</button>
+
+<div id="receivingHistory"></div>
+
+</div>
 <h2 class="section-title">
 SHIFT OPENING
 </h2>
+
+<h3 style="margin-bottom:10px;color:gold;">
+Normal Bottles
+</h3>
+
+<div class="table-wrapper">
+
+<table class="stock-table">
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Bottles</th>
+</tr>
+</thead>
+
+<tbody id="openingStockTable"></tbody>
+
+</table>
+
+</div>
+
+<br>
+
+<h3 style="margin-bottom:10px;color:gold;">
+Portioned Spirits
+</h3>
 
 <div class="table-wrapper">
 
@@ -382,7 +465,7 @@ SHIFT OPENING
 </tr>
 </thead>
 
-<tbody id="openingStockTable"></tbody>
+<tbody id="openingPortionTable"></tbody>
 
 </table>
 
@@ -615,7 +698,8 @@ document.getElementById('employeePanel')
 .classList.remove('hidden');
 
 await loadShiftProducts();
-
+await loadReceivingProducts();
+await loadReceivingHistory();
 return;
 
 }
@@ -814,6 +898,9 @@ async function saveProduct(){
 const productName =
 document.getElementById('productName').value;
 
+const portionType =
+document.getElementById('portionType').value;
+
 const buyingPrice =
 Number(document.getElementById('buyingPrice').value);
 
@@ -823,6 +910,8 @@ Number(document.getElementById('sellingPrice').value);
 await addDoc(collection(db,'products'),{
 
 name:productName,
+
+portionType:portionType,
 
 buyingPrice,
 
@@ -882,6 +971,33 @@ Delete Product
 </button>
 
 </div>
+
+`;
+
+});
+
+}
+async function loadReceivingProducts(){
+
+const select =
+document.getElementById('receiveProduct');
+
+if(!select) return;
+
+select.innerHTML = '';
+
+const querySnapshot =
+await getDocs(collection(db,'products'));
+
+querySnapshot.forEach((productDoc)=>{
+
+const product = productDoc.data();
+
+select.innerHTML += `
+
+<option value="${productDoc.id}">
+${product.name}
+</option>
 
 `;
 
@@ -1081,6 +1197,9 @@ async function loadShiftProducts(){
 const openingTable =
 document.getElementById('openingStockTable');
 
+const openingPortionTable =
+document.getElementById('openingPortionTable');
+
 const closingTable =
 document.getElementById('closingStockTable');
 
@@ -1089,6 +1208,7 @@ return;
 }
 
 openingTable.innerHTML = '';
+openingPortionTable.innerHTML = '';
 closingTable.innerHTML = '';
 
 try{
@@ -1100,7 +1220,13 @@ querySnapshot.forEach((productDoc)=>{
 
 const product = productDoc.data();
 
-openingTable.innerHTML += `
+/* =========================
+OPENING TABLE
+========================= */
+
+if(product.portionType === 'portion'){
+
+openingPortionTable.innerHTML += `
 
 <tr>
 
@@ -1141,6 +1267,37 @@ min="0">
 </tr>
 
 `;
+
+}else{
+
+openingTable.innerHTML += `
+
+<tr>
+
+<td>${product.name}</td>
+
+<td colspan="4">
+
+<input
+type="number"
+id="open-full-${productDoc.id}"
+value="0"
+min="0"
+placeholder="Bottles">
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+/* =========================
+CLOSING TABLE
+========================= */
+
+if(product.portionType === 'portion'){
 
 closingTable.innerHTML += `
 
@@ -1183,6 +1340,31 @@ min="0">
 </tr>
 
 `;
+
+}else{
+
+closingTable.innerHTML += `
+
+<tr>
+
+<td>${product.name}</td>
+
+<td colspan="4">
+
+<input
+type="number"
+id="close-full-${productDoc.id}"
+value="0"
+min="0"
+placeholder="Bottles">
+
+</td>
+
+</tr>
+
+`;
+
+}
 
 });
 
@@ -1290,7 +1472,154 @@ alert('Error starting shift');
 }
 
 }
+async function receiveStock(){
 
+try{
+
+const productId =
+document.getElementById('receiveProduct').value;
+
+const quantity =
+Number(document.getElementById('receiveQuantity').value);
+
+const buyingPrice =
+Number(document.getElementById('receiveBuying').value);
+
+if(!productId || quantity <= 0){
+
+alert('Enter valid stock');
+
+return;
+
+}
+
+const productDoc =
+await getDoc(doc(db,'products',productId));
+
+if(!productDoc.exists()){
+
+alert('Product not found');
+
+return;
+
+}
+
+const product = productDoc.data();
+
+await addDoc(collection(db,'stockReceiving'),{
+
+productId: productId,
+
+productName: product.name,
+
+quantity: quantity,
+
+buyingPrice: buyingPrice,
+
+totalCost: quantity * buyingPrice,
+
+createdAt: serverTimestamp()
+
+});
+
+/* =========================
+UPDATE LIVE INVENTORY
+========================= */
+
+const inventoryRef =
+doc(db,'inventory',productId);
+
+const inventoryDoc =
+await getDoc(inventoryRef);
+
+if(inventoryDoc.exists()){
+
+const currentStock =
+inventoryDoc.data().stock || 0;
+
+await updateDoc(inventoryRef,{
+
+stock: currentStock + quantity
+
+});
+
+}else{
+
+await setDoc(inventoryRef,{
+
+productName: product.name,
+
+stock: quantity
+
+});
+
+}
+
+alert('Stock Received Successfully');
+
+document.getElementById('receiveQuantity').value = '';
+
+document.getElementById('receiveBuying').value = '';
+
+loadReceivingHistory();
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error receiving stock');
+
+}
+
+}
+async function loadReceivingHistory(){
+
+const container =
+document.getElementById('receivingHistory');
+
+if(!container) return;
+
+container.innerHTML = '';
+
+const querySnapshot =
+await getDocs(collection(db,'stockReceiving'));
+
+querySnapshot.forEach((stockDoc)=>{
+
+const stock = stockDoc.data();
+
+let stockDate = 'Unknown Date';
+
+if(stock.createdAt?.seconds){
+
+stockDate = new Date(
+stock.createdAt.seconds * 1000
+).toLocaleString();
+
+}
+
+container.innerHTML += `
+
+<div class="glass">
+
+<h3>${stock.productName}</h3>
+
+<p>Quantity: ${stock.quantity}</p>
+
+<p>Buying Price: Ksh ${stock.buyingPrice}</p>
+
+<p>Total Cost: Ksh ${stock.totalCost}</p>
+
+<p>${stockDate}</p>
+
+</div>
+
+`;
+
+});
+
+}
 async function closeShift(){
 
 try{
@@ -1311,7 +1640,7 @@ await getDocs(collection(db,'products'));
 const savedOpening =
 JSON.parse(localStorage.getItem('openingStock')) || [];
 
-querySnapshot.forEach((productDoc)=>{
+for (const productDoc of querySnapshot.docs) {
 
 const product = productDoc.data();
 
@@ -1373,7 +1702,50 @@ soldUnits *
 expectedCash += sales;
 
 totalProfit += profit;
+/* =========================
+DEDUCT INVENTORY
+========================= */
 
+const inventoryRef =
+doc(db,'inventory',productDoc.id);
+
+const inventoryDoc =
+await getDoc(inventoryRef);
+
+if(inventoryDoc.exists()){
+
+const currentInventory =
+inventoryDoc.data().stock || 0;
+
+let soldInventory = 0;
+
+/* NORMAL BOTTLES */
+
+if(product.portionType === 'full'){
+
+soldInventory = soldUnits / 4;
+
+}else{
+
+/* PORTIONED SPIRITS */
+soldInventory = soldUnits / 4;
+
+}
+
+let newInventory =
+currentInventory - soldInventory;
+
+if(newInventory < 0){
+newInventory = 0;
+}
+
+await updateDoc(inventoryRef,{
+
+stock: newInventory
+
+});
+
+}
 closingStock.push({
 
 productId: productDoc.id,
@@ -1396,7 +1768,7 @@ profit: profit
 
 });
 
-});
+}
 
 document.querySelectorAll('.expense-amount')
 .forEach((expense)=>{
@@ -1558,7 +1930,49 @@ document.getElementById('difference')
 .innerHTML = `Ksh ${totalDifference.toFixed(0)}`;
 
 }
+async function viewInventory(){
 
+const container =
+document.getElementById('inventoryContainer');
+
+container.innerHTML = '';
+
+try{
+
+const querySnapshot =
+await getDocs(collection(db,'inventory'));
+
+querySnapshot.forEach((inventoryDoc)=>{
+
+const item = inventoryDoc.data();
+
+container.innerHTML += `
+
+<div class="glass">
+
+<h3>${item.productName}</h3>
+
+<p>
+Current Stock:
+${Number(item.stock || 0).toFixed(2)}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+catch(error){
+
+console.error(error);
+
+alert('Error loading inventory');
+
+}
+
+}
 window.loginUser = loginUser;
 window.closeLogin = closeLogin;
 window.logoutUser = logoutUser;
@@ -1659,6 +2073,8 @@ window.viewEmployees = viewEmployees;
 window.deleteEmployee = deleteEmployee;
 window.deleteProduct = deleteProduct;
 window.editProduct = editProduct;
+window.receiveStock = receiveStock;
+window.viewInventory = viewInventory;
 </script>
 
 </body>
