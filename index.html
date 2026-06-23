@@ -613,33 +613,28 @@ now.toLocaleTimeString();
 
 let tapCount = 0;
 
-const logo =
-document.getElementById('logoTap');
+const logo = document.getElementById('logoTap');
 
-function handleLogoTap(){
+logo.addEventListener('click', () => {
 
-tapCount++;
+    tapCount++;
 
-if(tapCount === 3){
+    if (tapCount >= 3) {
 
-document.getElementById('loginModal')
-.classList.remove('hidden');
+        document
+            .getElementById('loginModal')
+            .classList.remove('hidden');
 
-tapCount = 0;
+        tapCount = 0;
+    }
 
-}
+    clearTimeout(window.tapTimer);
 
-setTimeout(()=>{
-tapCount = 0;
-},1000);
+    window.tapTimer = setTimeout(() => {
+        tapCount = 0;
+    }, 1000);
 
-}
-
-/* DESKTOP CLICK */
-logo.addEventListener('click', handleLogoTap);
-
-/* MOBILE TOUCH */
-logo.addEventListener('touchstart', handleLogoTap);
+});
 
 function closeLogin(){
 
@@ -1193,17 +1188,6 @@ for(const inventoryDoc of inventorySnapshot.docs){
 await deleteDoc(
   doc(db,'settings','kegSettings')
 );
-// DELETE INVENTORY
-const inventorySnapshot =
-await getDocs(collection(db,'inventory'));
-
-for(const inventoryDoc of inventorySnapshot.docs){
-
-    await deleteDoc(
-        doc(db,'inventory',inventoryDoc.id)
-    );
-
-}
 // CLEAR LOCAL STORAGE
 localStorage.removeItem('openingStock');
 
