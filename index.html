@@ -1193,6 +1193,17 @@ for(const inventoryDoc of inventorySnapshot.docs){
 await deleteDoc(
   doc(db,'settings','kegSettings')
 );
+// DELETE INVENTORY
+const inventorySnapshot =
+await getDocs(collection(db,'inventory'));
+
+for(const inventoryDoc of inventorySnapshot.docs){
+
+    await deleteDoc(
+        doc(db,'inventory',inventoryDoc.id)
+    );
+
+}
 // CLEAR LOCAL STORAGE
 localStorage.removeItem('openingStock');
 
