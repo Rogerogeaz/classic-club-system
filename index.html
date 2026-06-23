@@ -1447,17 +1447,21 @@ querySnapshot.forEach((productDoc)=>{
 
 const product = productDoc.data();
 
-const full =
-Number(document.getElementById(`open-full-${productDoc.id}`).value || 0);
+const full = Number(
+  document.getElementById(`open-full-${productDoc.id}`)?.value || 0
+);
 
-const three =
-Number(document.getElementById(`open-three-${productDoc.id}`).value || 0);
+const three = Number(
+  document.getElementById(`open-three-${productDoc.id}`)?.value || 0
+);
 
-const half =
-Number(document.getElementById(`open-half-${productDoc.id}`).value || 0);
+const half = Number(
+  document.getElementById(`open-half-${productDoc.id}`)?.value || 0
+);
 
-const quarter =
-Number(document.getElementById(`open-quarter-${productDoc.id}`).value || 0);
+const quarter = Number(
+  document.getElementById(`open-quarter-${productDoc.id}`)?.value || 0
+);
 
 shiftData.push({
 
@@ -1678,17 +1682,21 @@ for (const productDoc of querySnapshot.docs) {
 
 const product = productDoc.data();
 
-const full =
-Number(document.getElementById(`close-full-${productDoc.id}`).value || 0);
+const full = Number(
+  document.getElementById(`close-full-${productDoc.id}`)?.value || 0
+);
 
-const three =
-Number(document.getElementById(`close-three-${productDoc.id}`).value || 0);
+const three = Number(
+  document.getElementById(`close-three-${productDoc.id}`)?.value || 0
+);
 
-const half =
-Number(document.getElementById(`close-half-${productDoc.id}`).value || 0);
+const half = Number(
+  document.getElementById(`close-half-${productDoc.id}`)?.value || 0
+);
 
-const quarter =
-Number(document.getElementById(`close-quarter-${productDoc.id}`).value || 0);
+const quarter = Number(
+  document.getElementById(`close-quarter-${productDoc.id}`)?.value || 0
+);
 
 const openingProduct =
 savedOpening.find(
