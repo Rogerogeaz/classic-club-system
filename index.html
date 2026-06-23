@@ -1165,7 +1165,34 @@ doc(db,'shiftClosing',closingDoc.id)
 );
 
 }
+// DELETE STOCK RECEIVING
+const receivingSnapshot =
+await getDocs(collection(db,'stockReceiving'));
 
+for(const receivingDoc of receivingSnapshot.docs){
+
+  await deleteDoc(
+    doc(db,'stockReceiving',receivingDoc.id)
+  );
+
+}
+
+// DELETE INVENTORY
+const inventorySnapshot =
+await getDocs(collection(db,'inventory'));
+
+for(const inventoryDoc of inventorySnapshot.docs){
+
+  await deleteDoc(
+    doc(db,'inventory',inventoryDoc.id)
+  );
+
+}
+
+// DELETE KEG SETTINGS
+await deleteDoc(
+  doc(db,'settings','kegSettings')
+);
 // CLEAR LOCAL STORAGE
 localStorage.removeItem('openingStock');
 
